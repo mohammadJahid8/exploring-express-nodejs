@@ -71,41 +71,46 @@ exports.saveUser = (req, res, next) => {
 
 exports.updateAUser = (req, res, next) => {
     // const newUser = req.body;
-    const { id } = req.params;
-    if (id) {
-        fs.readFile("user.json", (err, data) => {
-            if (err) {
-                res.status(500).json({ success: false, message: err.message })
-                return;
-            }
-            const users = JSON.parse(data);
-            let filterUsers = users.filter((user) => user.id === Number(id));
+    try {
+        const { id } = req.params;
+        if (req.body.id) {
+            fs.readFile("user.json", (err, data) => {
+                if (err) {
+                    res.status(500).json({ success: false, message: err.message })
+                    return;
+                }
+                const users = JSON.parse(data);
+                let filterUsers = users.filter((user) => user.id === Number(id));
 
-            if (filterUsers.length < 1) {
-                res.status(500).json({ success: false, message: "please provide a valid id" })
-                return;
-            } else {
-                filterUsers[0].id = req.body.id;
-                filterUsers[0].gender = req.body.gender;
-                filterUsers[0].name = req.body.name;
-                filterUsers[0].contact = req.body.contact;
-                filterUsers[0].address = req.body.address;
-                filterUsers[0].photoUrl = req.body.photoUrl;
+                if (filterUsers.length < 1) {
+                    res.status(500).json({ success: false, message: "please provide a valid id" })
+                    return;
+                } else {
+                    filterUsers[0].id = req.body.id;
+                    filterUsers[0].gender = req.body.gender;
+                    filterUsers[0].name = req.body.name;
+                    filterUsers[0].contact = req.body.contact;
+                    filterUsers[0].address = req.body.address;
+                    filterUsers[0].photoUrl = req.body.photoUrl;
 
-                users.push(filterUsers[0]);
-                const userStringify = JSON.stringify(users);
-                fs.writeFile("user.json", userStringify, (err) => {
-                    if (err) {
-                        res.status(500).json({ success: false, message: err.message });
-                        return;
-                    }
-                    res.status(200).json({ success: true, message: 'Successfully updated user', updatedUser: filterUsers });
+                    users.push(filterUsers[0]);
+                    const userStringify = JSON.stringify(users);
+                    fs.writeFile("user.json", userStringify, (err) => {
+                        if (err) {
+                            res.status(500).json({ success: false, message: err.message });
+                            return;
+                        }
+                        res.status(200).json({ success: true, message: 'Successfully updated user', updatedUser: filterUsers });
 
-                })
-            }
+                    })
+                }
 
-        })
-    } else {
-        res.status(500).json({ success: false, message: "please provide correct data" });
+            })
+        } else {
+            res.status(500).json({ success: false, message: "please provide data" });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+        next(err)
     }
 }
