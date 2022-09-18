@@ -34,3 +34,37 @@ exports.getAllUser = (req, res, next) => {
         }
     });
 }
+
+exports.saveUser = (req, res, next) => {
+    fs.readFile("user.json", (err, data) => {
+        if (err) {
+            res.status(500).json({ success: false, message: err.message });
+            return;
+        }
+        try {
+            const newUser = req.body;
+            const { id, gender, name, contact, address, photoUrl } = newUser;
+
+            // validate the body and check if all the required properties are present in the body.
+            if (id && gender && name && contact && address && photoUrl) {
+                const users = JSON.parse(data);
+                users.push(newUser);
+                const userString = JSON.stringify(users)
+                fs.writeFile("user.json", userString, (err) => {
+                    if (err) {
+                        res.status(500).json({ success: false, message: err.message });
+                        return;
+                    }
+
+                })
+                res.status(200).json({ success: true, message: 'Successfully added a user' });
+
+            } else {
+                res.status(500).json({ success: false, message: "missing property in body" });
+            }
+        } catch (err) {
+            res.status(500).json({ success: false, message: err.message });
+            next(err)
+        }
+    });
+}
