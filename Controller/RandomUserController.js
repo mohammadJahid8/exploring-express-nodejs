@@ -1,7 +1,8 @@
 const fs = require("fs");
 
+
 exports.getRandomUser = (req, res, next) => {
-    fs.readFile("user.json", (err, data) => {
+    fs.readFile("../user.json", (err, data) => {
         if (err) {
             res.status(500).json({ success: false, message: err.message });
             return;
