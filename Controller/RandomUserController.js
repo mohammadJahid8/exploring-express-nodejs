@@ -114,3 +114,36 @@ exports.updateAUser = (req, res, next) => {
         next(err)
     }
 }
+
+exports.DeleteUser = (req, res, next) => {
+    fs.readFile("user.json", (err, data) => {
+        if (err) {
+            res.status(500).json({ success: false, message: err.message });
+            return;
+        }
+        try {
+            const { id } = req.params;
+            const users = JSON.parse(data);
+            let filterUsers = users.filter((user) => user.id !== Number(id));
+
+            if (filterUsers.length < 1) {
+                res.status(500).json({ success: false, message: "please provide a valid id" })
+                return;
+            } else {
+                // users.push(filterUsers);
+                const userStringify = JSON.stringify(filterUsers);
+                fs.writeFile("user.json", userStringify, (err) => {
+                    if (err) {
+                        res.status(500).json({ success: false, message: err.message });
+                        return;
+                    }
+                    res.status(200).json({ success: true, message: 'Successfully Deleted the user' });
+
+                })
+            }
+        } catch (err) {
+            next(err)
+            console.log("Error parsing JSON string:", err);
+        }
+    });
+}
