@@ -148,3 +148,7 @@ exports.DeleteUser = (req, res, next) => {
         }
     });
 }
+
+exports.test = (req, res) => {
+    res.send("testing")
+}
