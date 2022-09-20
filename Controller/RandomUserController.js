@@ -2,7 +2,7 @@ const fs = require("fs");
 
 
 exports.getRandomUser = (req, res, next) => {
-    fs.readFile("../user.json", (err, data) => {
+    fs.readFile("user.json", (err, data) => {
         if (err) {
             res.status(500).json({ success: false, message: err.message });
             return;
@@ -94,7 +94,7 @@ exports.updateAUser = (req, res, next) => {
                     filterUsers[0].address = req.body.address;
                     filterUsers[0].photoUrl = req.body.photoUrl;
 
-                    users.push(filterUsers[0]);
+                    // users.push(filterUsers[0]);
                     const userStringify = JSON.stringify(users);
                     fs.writeFile("user.json", userStringify, (err) => {
                         if (err) {
@@ -109,6 +109,52 @@ exports.updateAUser = (req, res, next) => {
             })
         } else {
             res.status(500).json({ success: false, message: "please provide data" });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+        next(err)
+    }
+}
+exports.updateMultipleUser = (req, res, next) => {
+    const info = req.body;
+    const ids = info.ids;
+    const updateInfo = info.updatedInfo;
+
+    try {
+        if (ids && updateInfo) {
+            fs.readFile("user.json", (err, data) => {
+                if (err) {
+                    res.status(500).json({ success: false, message: err.message })
+                    return;
+                }
+                const users = JSON.parse(data);
+
+                ids.forEach(id => {
+                    let filterUsers = users.filter((user) => user.id === Number(id));
+                    console.log(filterUsers[0])
+                    if (filterUsers.length < 1) {
+                        res.status(500).json({ success: false, message: "please provide valid ids" })
+                        return;
+                    } else {
+
+                        filterUsers[0].name = updateInfo.name;
+                        filterUsers[0].photoUrl = updateInfo.photoUrl;
+
+                        // users.push(filterUsers[0]);
+                        const userStringify = JSON.stringify(users);
+                        fs.writeFile("user.json", userStringify, (err) => {
+                            if (err) {
+                                res.status(500).json({ success: false, message: err.message });
+                                return;
+                            }
+                            res.status(200).json({ success: true, message: 'Successfully updated users', updatedUser: users });
+
+                        })
+                    }
+                })
+            })
+        } else {
+            res.status(500).json({ success: false, message: "please provide ids and updateInfo" });
         }
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -149,6 +195,6 @@ exports.DeleteUser = (req, res, next) => {
     });
 }
 
-exports.test = (req, res) => {
-    res.send("testing")
-}
+// exports.test = (req, res) => {
+//     res.send("testing")
+// }
